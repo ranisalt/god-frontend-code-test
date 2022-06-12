@@ -1,4 +1,7 @@
 body {
-  background: steelblue;
-  color: white;
+  background: #fff;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  width: 100vw;
 }
