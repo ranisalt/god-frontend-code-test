@@ -3,62 +3,59 @@ import Image, { ImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Block, Flex, Link, Text, useTheme } from "vcc-ui";
 import { Carousel } from "../src/components";
-import { ScrollDirection } from "../src/components/Carousel";
 
 type Car = typeof CARS[0];
 
 const isDivElement = (el: ChildNode | null): el is HTMLDivElement =>
   el?.nodeName === "DIV";
 
-const getChildWidth = (current: HTMLDivElement) => {
-  const { firstChild } = current;
-  if (!isDivElement(firstChild)) return;
-
-  const { nextSibling } = firstChild;
-  if (!isDivElement(nextSibling)) return;
-
-  return nextSibling.offsetLeft - firstChild.offsetLeft;
-};
-
 const HomePage = () => {
-  const theme = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const scroll = (direction: ScrollDirection) => {
+  const onCarouselMove = (
+    nextOffset: (offsetLeft: number, columnWidth: number) => number
+  ) => {
     const { current } = gridRef;
     if (!current) return;
 
-    const columnWidth = getChildWidth(current);
-    if (!columnWidth) return;
+    const { firstChild } = current;
+    if (!isDivElement(firstChild)) return;
 
-    current.scrollBy({ left: columnWidth * direction, behavior: "smooth" });
+    const { nextSibling } = firstChild;
+    if (!isDivElement(nextSibling)) return;
+
+    const columnWidth = nextSibling.offsetLeft - firstChild.offsetLeft;
+
+    const left = nextOffset(current.scrollLeft, columnWidth);
+    current.scrollTo({ left, behavior: "smooth" });
   };
 
   useEffect(() => {
-    const { current } = gridRef;
-    if (!current) return;
-
-    const columnWidth = getChildWidth(current);
-    if (!columnWidth) return;
-
-    current.scrollTo({ left: columnWidth * currentIndex, behavior: "smooth" });
+    onCarouselMove((_, width) => width * currentIndex);
   }, [currentIndex]);
 
-  const { BACK, FORWARD } = Carousel.ScrollDirection;
   return (
     <>
       <Carousel.Container ref={gridRef}>
-        <>
-          {CARS.map((car) => (
-            <CarouselEntry key={car.id} {...car} />
-          ))}
-        </>
+        {CARS.map((car) => (
+          <CarouselEntry key={car.id} {...car} />
+        ))}
       </Carousel.Container>
 
       <Carousel.Controls>
-        <Carousel.ControlArrow direction={BACK} onClick={scroll} />
-        <Carousel.ControlArrow direction={FORWARD} onClick={scroll} />
+        {/* these buttons should use mediacircled-previous and mediacircled-next,
+        but they are missing from possible values of "iconName" */}
+        <Carousel.ControlArrow
+          aria-label={"Back"}
+          iconName={"navigation-chevronback"}
+          onClick={() => onCarouselMove((left, width) => left - width)}
+        />
+        <Carousel.ControlArrow
+          aria-label={"Forward"}
+          iconName={"navigation-chevronforward"}
+          onClick={() => onCarouselMove((left, width) => left + width)}
+        />
 
         {CARS.map((_, index) => (
           <Carousel.ControlIndicator
