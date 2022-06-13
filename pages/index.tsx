@@ -1,7 +1,7 @@
 import CARS from "../public/api/cars.json";
 import Image, { ImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Block, Flex, Link, Text, useTheme } from "vcc-ui";
+import { Block, Flex, Link, SelectInput, Text, useTheme, View } from "vcc-ui";
 import { Carousel } from "../src/components";
 
 type Car = typeof CARS[0];
@@ -11,7 +11,13 @@ const isDivElement = (el: ChildNode | null): el is HTMLDivElement =>
 
 const HomePage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [filter, setFilter] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
+
+  const modelTypes = Array.from(new Set(CARS.map((c) => c.modelType)));
+
+  const filteredCars =
+    filter !== "all" ? CARS.filter((c) => c.modelType === filter) : CARS;
 
   const onCarouselMove = (
     nextOffset: (offsetLeft: number, columnWidth: number) => number
@@ -37,8 +43,23 @@ const HomePage = () => {
 
   return (
     <>
+      <View padding={4} paddingBottom={0} display="inline-flex">
+        <SelectInput
+          label={"Filter by type"}
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        >
+          <option value="all">all</option>
+          {modelTypes.map((modelType) => (
+            <option key={modelType} value={modelType}>
+              {modelType}
+            </option>
+          ))}
+        </SelectInput>
+      </View>
+
       <Carousel.Container ref={gridRef}>
-        {CARS.map((car) => (
+        {filteredCars.map((car) => (
           <CarouselEntry key={car.id} {...car} />
         ))}
       </Carousel.Container>
@@ -57,7 +78,7 @@ const HomePage = () => {
           onClick={() => onCarouselMove((left, width) => left + width)}
         />
 
-        {CARS.map((_, index) => (
+        {filteredCars.map((_, index) => (
           <Carousel.ControlIndicator
             key={index}
             current={currentIndex === index}
