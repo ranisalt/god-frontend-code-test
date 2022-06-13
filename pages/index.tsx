@@ -1,14 +1,23 @@
 import CARS from "../public/api/cars.json";
-import Image from "next/image";
+import Image, { ImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Block, Flex, IconButton, Link, Text, useTheme, View } from "vcc-ui";
+import {
+  Block,
+  Flex,
+  IconButton,
+  Link,
+  Text,
+  useTheme,
+  View,
+  ViewProps,
+} from "vcc-ui";
+import { Carousel } from "../src/components";
+import { ScrollDirection } from "../src/components/Carousel";
 
 type Car = typeof CARS[0];
 
 const isDivElement = (el: ChildNode | null): el is HTMLDivElement =>
   el?.nodeName === "DIV";
-
-type ScrollDirection = "forward" | "back";
 
 const getChildWidth = (current: HTMLDivElement) => {
   const { firstChild } = current;
@@ -32,10 +41,7 @@ const HomePage = () => {
     const columnWidth = getChildWidth(current);
     if (!columnWidth) return;
 
-    current.scrollBy({
-      left: direction === "forward" ? columnWidth : -columnWidth,
-      behavior: "smooth",
-    });
+    current.scrollBy({ left: columnWidth * direction, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -45,91 +51,43 @@ const HomePage = () => {
     const columnWidth = getChildWidth(current);
     if (!columnWidth) return;
 
-    current.scrollTo({ left: currentIndex * columnWidth, behavior: "smooth" });
+    current.scrollTo({ left: columnWidth * currentIndex, behavior: "smooth" });
   }, [currentIndex]);
 
+  const { BACK, FORWARD } = Carousel.ScrollDirection;
   return (
     <>
-      <View
-        display="grid"
-        padding={4}
-        extend={{
-          columnGap: 2 * theme.baselineGrid,
-          scrollPaddingInline: 4 * theme.baselineGrid,
-          gridAutoFlow: "column",
-          overflow: "auto",
-          scrollbarWidth: "none",
-          scrollSnapType: "x mandatory",
-        }}
-        ref={gridRef}
-      >
-        {CARS.map((car) => (
-          <ListEntry key={car.id} {...car} />
-        ))}
-      </View>
+      <Carousel.Container ref={gridRef}>
+        <>
+          {CARS.map((car) => (
+            <CarouselEntry key={car.id} {...car} />
+          ))}
+        </>
+      </Carousel.Container>
 
-      <View
-        padding={4}
-        paddingTop={0}
-        direction="row"
-        justifyContent="end"
-        extend={{
-          columnGap: theme.baselineGrid,
-          [theme.breakpoints.untilM]: { display: "none" },
-        }}
-      >
-        {/* these buttons should use mediacircled-previous and mediacircled-next, but they are missing from possible values of "iconName" */}
-        <IconButton
-          aria-label="Back"
-          iconName="navigation-chevronback"
-          onClick={() => scroll("back")}
-          variant="outline"
-        />
-        <IconButton
-          aria-label="Forward"
-          iconName="navigation-chevronforward"
-          onClick={() => scroll("forward")}
-          variant="outline"
-        />
-      </View>
+      <Carousel.Controls>
+        <Carousel.ControlArrow direction={BACK} onClick={scroll} />
+        <Carousel.ControlArrow direction={FORWARD} onClick={scroll} />
 
-      <View
-        padding={4}
-        paddingTop={0}
-        direction="row"
-        justifyContent="center"
-        extend={{
-          columnGap: theme.baselineGrid / 2,
-          [theme.breakpoints.fromM]: { display: "none" },
-        }}
-      >
         {CARS.map((_, index) => (
-          <Block
+          <Carousel.ControlIndicator
             key={index}
-            extend={{ cursor: "pointer", padding: theme.baselineGrid / 2 }}
+            current={currentIndex === index}
             onClick={() => setCurrentIndex(index)}
-          >
-            <Block
-              extend={{
-                backgroundColor:
-                  currentIndex === index
-                    ? theme.color.foreground.primary
-                    : theme.color.ornament.divider,
-                borderRadius: "50%",
-                height: theme.baselineGrid,
-                // there is an attribute "animation" on the theme object, but it is not typed. 150ms is equivalent to the "elk" duration
-                transition: "150ms ease-in-out",
-                width: theme.baselineGrid,
-              }}
-            />
-          </Block>
+          />
         ))}
-      </View>
+      </Carousel.Controls>
     </>
   );
 };
 
-const ListEntry = ({ id, bodyType, imageUrl, modelName, modelType }: Car) => {
+const CarouselEntry = ({
+  id,
+  bodyType,
+  imageUrl,
+  modelName,
+  modelType,
+}: Car) => {
   const theme = useTheme();
 
   return (
@@ -170,24 +128,7 @@ const ListEntry = ({ id, bodyType, imageUrl, modelName, modelType }: Car) => {
         </Text>
       </Flex>
 
-      <Block
-        extend={{
-          aspectRatio: "4 / 3",
-          marginBlock: theme.baselineGrid,
-          position: "relative",
-          // each item is as wide as possible, sans the container padding (4 * baseline grid on each side), so it sits perfectly centered
-          width: `calc(100vw - ${8 * theme.baselineGrid}px)`,
-          [theme.breakpoints.fromM]: { width: 290 },
-        }}
-      >
-        <Image
-          src={imageUrl}
-          layout="fill"
-          objectFit="cover"
-          objectPosition="center"
-          alt={modelName}
-        />
-      </Block>
+      <CarImage src={imageUrl} alt={modelName} />
 
       <Flex
         extend={{
@@ -203,6 +144,31 @@ const ListEntry = ({ id, bodyType, imageUrl, modelName, modelType }: Car) => {
           Shop
         </Link>
       </Flex>
+    </Block>
+  );
+};
+
+const CarImage = ({ src, alt }: Pick<ImageProps, "src" | "alt">) => {
+  const theme = useTheme();
+
+  return (
+    <Block
+      extend={{
+        aspectRatio: "4 / 3",
+        marginBlock: theme.baselineGrid,
+        position: "relative",
+        // each item is as wide as possible, sans the container padding (4 * baseline grid on each side), so it sits perfectly centered
+        width: `calc(100vw - ${8 * theme.baselineGrid}px)`,
+        [theme.breakpoints.fromM]: { width: 290 },
+      }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        layout="fill"
+        objectFit="cover"
+        objectPosition="center"
+      />
     </Block>
   );
 };
