@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { IconButton, SelectInput, Spinner, useTheme, View } from "vcc-ui";
 import { BreakpointHide, Car, CarEntry, Carousel } from "../src/components";
+import { useFetch } from "../src/hooks";
 
 const isDivElement = (el: ChildNode | null): el is HTMLDivElement =>
   el?.nodeName === "DIV";
@@ -10,8 +11,7 @@ const HomePage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filter, setFilter] = useState("all");
   const [gridRef, setGridRef] = useState<HTMLDivElement | null>(null);
-
-  const [allCars, setAllCars] = useState<Car[] | null>(null);
+  const allCars = useFetch<Car[]>("/api/cars.json");
 
   const bodyTypes = Array.from(new Set(allCars?.map((c) => c.bodyType)));
 
@@ -64,15 +64,6 @@ const HomePage = () => {
   useEffect(() => {
     gridRef?.scrollTo({ left: 0, behavior: "smooth" });
   }, [filter]);
-
-  useEffect(() => {
-    const fetchCars = async () => {
-      const response = await fetch("/api/cars.json");
-      const cars: Car[] = await response.json();
-      setAllCars(cars);
-    };
-    fetchCars();
-  }, []);
 
   if (!allCars || !filteredCars) {
     return (
