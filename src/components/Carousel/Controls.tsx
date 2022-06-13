@@ -14,7 +14,6 @@ export const Controls = ({ children }: { children: ReactNode }) => {
         justifyContent: "center",
         [theme.breakpoints.fromM]: {
           columnGap: theme.baselineGrid,
-          display: "none",
           justifyContent: "end",
         },
       }}

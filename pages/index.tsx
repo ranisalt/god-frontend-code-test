@@ -1,7 +1,16 @@
 import CARS from "../public/api/cars.json";
 import Image, { ImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Block, Flex, Link, SelectInput, Text, useTheme, View } from "vcc-ui";
+import {
+  Block,
+  Flex,
+  IconButton,
+  Link,
+  SelectInput,
+  Text,
+  useTheme,
+  View,
+} from "vcc-ui";
 import { Carousel } from "../src/components";
 
 type Car = typeof CARS[0];
@@ -10,14 +19,15 @@ const isDivElement = (el: ChildNode | null): el is HTMLDivElement =>
   el?.nodeName === "DIV";
 
 const HomePage = () => {
+  const theme = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filter, setFilter] = useState("all");
   const gridRef = useRef<HTMLDivElement>(null);
 
-  const modelTypes = Array.from(new Set(CARS.map((c) => c.modelType)));
+  const bodyTypes = Array.from(new Set(CARS.map((c) => c.bodyType)));
 
   const filteredCars =
-    filter !== "all" ? CARS.filter((c) => c.modelType === filter) : CARS;
+    filter !== "all" ? CARS.filter((c) => c.bodyType === filter) : CARS;
 
   const onCarouselMove = (
     nextOffset: (offsetLeft: number, columnWidth: number) => number
@@ -38,21 +48,26 @@ const HomePage = () => {
   };
 
   useEffect(() => {
+    setCurrentIndex(0);
+  }, [filter]);
+
+  useEffect(() => {
     onCarouselMove((_, width) => width * currentIndex);
   }, [currentIndex]);
 
   return (
     <>
-      <View padding={4} paddingBottom={0} display="inline-flex">
+      <View padding={4} paddingBottom={0} width={290}>
         <SelectInput
-          label={"Filter by type"}
+          label={"Filter by body type"}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
           <option value="all">all</option>
-          {modelTypes.map((modelType) => (
-            <option key={modelType} value={modelType}>
-              {modelType}
+
+          {bodyTypes.map((bodyType) => (
+            <option key={bodyType} value={bodyType}>
+              {bodyType}
             </option>
           ))}
         </SelectInput>
@@ -65,26 +80,38 @@ const HomePage = () => {
       </Carousel.Container>
 
       <Carousel.Controls>
-        {/* these buttons should use mediacircled-previous and mediacircled-next,
+        <View
+          display="contents"
+          extend={{ [theme.breakpoints.untilM]: { display: "none" } }}
+        >
+          {/* these buttons should use mediacircled-previous and mediacircled-next,
         but they are missing from possible values of "iconName" */}
-        <Carousel.ControlArrow
-          aria-label={"Back"}
-          iconName={"navigation-chevronback"}
-          onClick={() => onCarouselMove((left, width) => left - width)}
-        />
-        <Carousel.ControlArrow
-          aria-label={"Forward"}
-          iconName={"navigation-chevronforward"}
-          onClick={() => onCarouselMove((left, width) => left + width)}
-        />
-
-        {filteredCars.map((_, index) => (
-          <Carousel.ControlIndicator
-            key={index}
-            current={currentIndex === index}
-            onClick={() => setCurrentIndex(index)}
+          <IconButton
+            aria-label="Back"
+            iconName="navigation-chevronback"
+            onClick={() => onCarouselMove((left, width) => left - width)}
+            variant="outline"
           />
-        ))}
+          <IconButton
+            aria-label="Forward"
+            iconName="navigation-chevronforward"
+            onClick={() => onCarouselMove((left, width) => left + width)}
+            variant="outline"
+          />
+        </View>
+
+        <View
+          display="contents"
+          extend={{ [theme.breakpoints.fromM]: { display: "none" } }}
+        >
+          {filteredCars.map((_, index) => (
+            <Carousel.ControlIndicator
+              key={index}
+              current={currentIndex === index}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </View>
       </Carousel.Controls>
     </>
   );

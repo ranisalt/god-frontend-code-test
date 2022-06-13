@@ -8,6 +8,7 @@ export const Container = forwardRef<HTMLDivElement, { children: ReactNode }>(
     return (
       <View
         display="grid"
+        justifyContent="start"
         padding={4}
         extend={{
           columnGap: 2 * theme.baselineGrid,
