@@ -1,16 +1,7 @@
 import CARS from "../public/api/cars.json";
 import Image, { ImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
-import {
-  Block,
-  Flex,
-  IconButton,
-  Link,
-  Text,
-  useTheme,
-  View,
-  ViewProps,
-} from "vcc-ui";
+import { Block, Flex, Link, Text, useTheme } from "vcc-ui";
 import { Carousel } from "../src/components";
 import { ScrollDirection } from "../src/components/Carousel";
 

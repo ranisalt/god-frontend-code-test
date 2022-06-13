@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useTheme, View } from "vcc-ui";
 
 export const Controls = ({ children }: { children: ReactNode }) => {

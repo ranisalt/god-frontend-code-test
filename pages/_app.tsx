@@ -2,7 +2,7 @@ import "../public/css/styles.css";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import Head from "next/head";
-import React from "react";
+import { StrictMode } from "react";
 import { StyleProvider, ThemePicker } from "vcc-ui";
 
 type AppPropsWithLayout = AppProps & {
@@ -11,7 +11,7 @@ type AppPropsWithLayout = AppProps & {
 
 const App = ({ Component, pageProps }: AppPropsWithLayout) => {
   return (
-    <React.StrictMode>
+    <StrictMode>
       <Head>
         <meta
           key="viewport"
@@ -25,7 +25,7 @@ const App = ({ Component, pageProps }: AppPropsWithLayout) => {
           <Component {...pageProps} />
         </ThemePicker>
       </StyleProvider>
-    </React.StrictMode>
+    </StrictMode>
   );
 };
 

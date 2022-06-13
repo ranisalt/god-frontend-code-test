@@ -2,7 +2,7 @@ import { forwardRef, ReactNode } from "react";
 import { useTheme, View } from "vcc-ui";
 
 export const Container = forwardRef<HTMLDivElement, { children: ReactNode }>(
-  ({ children }, ref) => {
+  function Container({ children }, ref) {
     const theme = useTheme();
 
     return (
@@ -20,9 +20,7 @@ export const Container = forwardRef<HTMLDivElement, { children: ReactNode }>(
 
           // hide scrollbar
           scrollbarWidth: "none",
-          "&::-webkit-scrollbar": {
-            display: "none",
-          },
+          "&::-webkit-scrollbar": { display: "none" },
         }}
         ref={ref}
       >
