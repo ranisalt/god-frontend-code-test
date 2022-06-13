@@ -1,5 +1,5 @@
 import CARS from "../public/api/cars.json";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { IconButton, SelectInput, useTheme, View } from "vcc-ui";
 import { BreakpointHide, CarEntry, Carousel } from "../src/components";
 
@@ -10,38 +10,61 @@ const HomePage = () => {
   const theme = useTheme();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filter, setFilter] = useState("all");
-  const gridRef = useRef<HTMLDivElement>(null);
+  const [gridRef, setGridRef] = useState<HTMLDivElement | null>(null);
 
   const bodyTypes = Array.from(new Set(CARS.map((c) => c.bodyType)));
 
   const filteredCars =
     filter !== "all" ? CARS.filter((c) => c.bodyType === filter) : CARS;
 
-  const onCarouselMove = (
-    nextOffset: (offsetLeft: number, columnWidth: number) => number
-  ) => {
-    const { current } = gridRef;
-    if (!current) return;
+  const getColumnWidth = () => {
+    if (!gridRef) return;
 
-    const { firstChild } = current;
+    const { firstChild } = gridRef;
     if (!isDivElement(firstChild)) return;
 
     const { nextSibling } = firstChild;
     if (!isDivElement(nextSibling)) return;
 
-    const columnWidth = nextSibling.offsetLeft - firstChild.offsetLeft;
+    return nextSibling.offsetLeft - firstChild.offsetLeft;
+  };
 
-    const left = nextOffset(current.scrollLeft, columnWidth);
-    current.scrollTo({ left, behavior: "smooth" });
+  const onCarouselMove = (
+    nextOffset: (offsetLeft: number, columnWidth: number) => number
+  ) => {
+    const columnWidth = getColumnWidth();
+    if (!gridRef || !columnWidth) return;
+
+    const left = nextOffset(gridRef.scrollLeft, columnWidth);
+    gridRef.scrollTo({ left, behavior: "smooth" });
   };
 
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [filter]);
+    const columnWidth = getColumnWidth();
+    if (!gridRef || !columnWidth) return;
+
+    let handle: number | undefined;
+    const listener = (ev: Event) => {
+      const { scrollLeft } = ev.target as HTMLDivElement;
+
+      if (handle) {
+        window.cancelAnimationFrame(handle);
+      }
+
+      handle = window.requestAnimationFrame(() =>
+        setCurrentIndex(Math.round(scrollLeft / columnWidth))
+      );
+    };
+
+    gridRef?.addEventListener("scroll", listener);
+    return () => gridRef?.removeEventListener("scroll", listener);
+  }, [filteredCars, gridRef]);
 
   useEffect(() => {
-    onCarouselMove((_, width) => width * currentIndex);
-  }, [currentIndex]);
+    gridRef?.scrollTo({ left: 0, behavior: "smooth" });
+  }, [filter]);
+
+  useEffect(() => {}, [currentIndex]);
 
   return (
     <>
@@ -61,7 +84,7 @@ const HomePage = () => {
         </SelectInput>
       </View>
 
-      <Carousel.Container ref={gridRef}>
+      <Carousel.Container ref={(ref) => setGridRef(ref)}>
         {filteredCars.map((car) => (
           <CarEntry key={car.id} {...car} />
         ))}
@@ -90,7 +113,7 @@ const HomePage = () => {
             <Carousel.ControlIndicator
               key={index}
               current={currentIndex === index}
-              onClick={() => setCurrentIndex(index)}
+              onClick={() => onCarouselMove((_, width) => index * width)}
             />
           ))}
         </BreakpointHide>
