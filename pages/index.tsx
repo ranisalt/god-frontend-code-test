@@ -62,7 +62,7 @@ const HomePage = () => {
   }, [filteredCars, gridRef]);
 
   useEffect(() => {
-    gridRef?.scrollTo({ left: 0, behavior: "smooth" });
+    gridRef?.scrollTo({ left: 0 });
   }, [filter]);
 
   if (!allCars || !filteredCars) {
