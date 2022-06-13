@@ -144,26 +144,7 @@ const CarouselEntry = ({
         {bodyType}
       </Text>
 
-      <Flex
-        extend={{
-          columnGap: theme.baselineSubGrid,
-          marginBottom: 2 * theme.baselineGrid,
-          [theme.breakpoints.fromM]: { flexDirection: "row" },
-        }}
-      >
-        <Text as="span" variant="columbus" subStyle="emphasis">
-          {modelName}
-        </Text>
-
-        <Text
-          as="span"
-          variant="columbus"
-          extend={{ color: theme.color.foreground.secondary }}
-        >
-          {modelType}
-        </Text>
-      </Flex>
-
+      <CarModel modelName={modelName} modelType={modelType} />
       <CarImage src={imageUrl} alt={modelName} />
 
       <Flex
@@ -181,6 +162,35 @@ const CarouselEntry = ({
         </Link>
       </Flex>
     </Block>
+  );
+};
+
+const CarModel = ({
+  modelName,
+  modelType,
+}: Pick<Car, "modelName" | "modelType">) => {
+  const theme = useTheme();
+
+  return (
+    <Flex
+      extend={{
+        columnGap: theme.baselineSubGrid,
+        marginBottom: 2 * theme.baselineGrid,
+        [theme.breakpoints.fromM]: { flexDirection: "row" },
+      }}
+    >
+      <Text as="span" variant="columbus" subStyle="emphasis">
+        {modelName}
+      </Text>
+
+      <Text
+        as="span"
+        variant="columbus"
+        extend={{ color: theme.color.foreground.secondary }}
+      >
+        {modelType}
+      </Text>
+    </Flex>
   );
 };
 

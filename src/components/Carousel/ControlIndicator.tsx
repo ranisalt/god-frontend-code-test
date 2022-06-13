@@ -7,6 +7,7 @@ interface Props {
 export const ControlIndicator = ({ current, onClick }: Props) => {
   const theme = useTheme();
 
+  // using nested block allows larger click area & improved accessibility
   return (
     <Block
       extend={{ cursor: "pointer", padding: theme.baselineGrid / 2 }}
