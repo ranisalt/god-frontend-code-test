@@ -1,7 +1,6 @@
-import CARS from "../public/api/cars.json";
 import { useEffect, useState } from "react";
-import { IconButton, SelectInput, useTheme, View } from "vcc-ui";
-import { BreakpointHide, CarEntry, Carousel } from "../src/components";
+import { IconButton, SelectInput, Spinner, useTheme, View } from "vcc-ui";
+import { BreakpointHide, Car, CarEntry, Carousel } from "../src/components";
 
 const isDivElement = (el: ChildNode | null): el is HTMLDivElement =>
   el?.nodeName === "DIV";
@@ -12,10 +11,12 @@ const HomePage = () => {
   const [filter, setFilter] = useState("all");
   const [gridRef, setGridRef] = useState<HTMLDivElement | null>(null);
 
-  const bodyTypes = Array.from(new Set(CARS.map((c) => c.bodyType)));
+  const [allCars, setAllCars] = useState<Car[] | null>(null);
+
+  const bodyTypes = Array.from(new Set(allCars?.map((c) => c.bodyType)));
 
   const filteredCars =
-    filter !== "all" ? CARS.filter((c) => c.bodyType === filter) : CARS;
+    filter !== "all" ? allCars?.filter((c) => c.bodyType === filter) : allCars;
 
   const getColumnWidth = () => {
     if (!gridRef) return;
@@ -64,7 +65,22 @@ const HomePage = () => {
     gridRef?.scrollTo({ left: 0, behavior: "smooth" });
   }, [filter]);
 
-  useEffect(() => {}, [currentIndex]);
+  useEffect(() => {
+    const fetchCars = async () => {
+      const response = await fetch("/api/cars.json");
+      const cars: Car[] = await response.json();
+      setAllCars(cars);
+    };
+    fetchCars();
+  }, []);
+
+  if (!allCars || !filteredCars) {
+    return (
+      <View alignItems="center" justifyContent="center" height="100vh">
+        <Spinner size={48} />
+      </View>
+    );
+  }
 
   return (
     <>
