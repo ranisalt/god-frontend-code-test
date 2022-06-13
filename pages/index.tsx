@@ -1,7 +1,7 @@
 import CARS from "../public/api/cars.json";
 import { useEffect, useRef, useState } from "react";
 import { IconButton, SelectInput, useTheme, View } from "vcc-ui";
-import { CarEntry, Carousel } from "../src/components";
+import { BreakpointHide, CarEntry, Carousel } from "../src/components";
 
 const isDivElement = (el: ChildNode | null): el is HTMLDivElement =>
   el?.nodeName === "DIV";
@@ -68,10 +68,7 @@ const HomePage = () => {
       </Carousel.Container>
 
       <Carousel.Controls>
-        <View
-          display="contents"
-          extend={{ [theme.breakpoints.untilM]: { display: "none" } }}
-        >
+        <BreakpointHide when={theme.breakpoints.untilM}>
           {/* these buttons should use mediacircled-previous and mediacircled-next,
         but they are missing from possible values of "iconName" */}
           <IconButton
@@ -86,12 +83,9 @@ const HomePage = () => {
             onClick={() => onCarouselMove((left, width) => left + width)}
             variant="outline"
           />
-        </View>
+        </BreakpointHide>
 
-        <View
-          display="contents"
-          extend={{ [theme.breakpoints.fromM]: { display: "none" } }}
-        >
+        <BreakpointHide when={theme.breakpoints.fromM}>
           {filteredCars.map((_, index) => (
             <Carousel.ControlIndicator
               key={index}
@@ -99,7 +93,7 @@ const HomePage = () => {
               onClick={() => setCurrentIndex(index)}
             />
           ))}
-        </View>
+        </BreakpointHide>
       </Carousel.Controls>
     </>
   );
